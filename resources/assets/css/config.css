@@ -1,0 +1,38 @@
+:root {
+    --principal: #80B900;
+    --secundario: #002357;
+    --blanco: #ffffff;
+}
+
+.login-page .login-box .card .card-header img {
+    width: 100%;
+}
+
+.vs-pagination--ul {
+    margin-bottom: 0px;
+}
+
+.modal.fade {
+    transition: 2s all;
+}
+
+.modal.fade.show {
+    padding-right: 17px;
+    display: block;
+    background-color: rgba(0, 0, 0, 0.479);
+    overflow: auto;
+}
+
+.el-avatar>img {
+    width: 100%;
+}
+
+.w-full {
+    width: 100% !important;
+}
+
+.is-invalid select,
+.is-invalid textarea,
+.is-invalid input {
+    border-color: #dc3545;
+}
