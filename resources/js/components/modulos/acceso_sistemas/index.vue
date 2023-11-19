@@ -124,9 +124,15 @@ export default {
     },
     methods: {
         getFuncionarios() {
-            axios.get("/admin/funcionarios").then((response) => {
-                this.listFuncionarios = response.data.funcionarios;
-            });
+            axios
+                .get("/admin/funcionarios", {
+                    params: {
+                        habilitados: 1,
+                    },
+                })
+                .then((response) => {
+                    this.listFuncionarios = response.data.funcionarios;
+                });
         },
         getCargo() {
             if (this.funcionario_id != "") {
@@ -138,9 +144,15 @@ export default {
             }
         },
         getSistemas() {
-            axios.get("/admin/sistemas").then((response) => {
-                this.listSistemas = response.data.sistemas;
-            });
+            axios
+                .get("/admin/sistemas", {
+                    params: {
+                        habilitados: 1,
+                    },
+                })
+                .then((response) => {
+                    this.listSistemas = response.data.sistemas;
+                });
         },
         buscaFuncionario() {
             if (this.filter_ci.trim() != "") {

@@ -19,7 +19,7 @@ class ReporteController extends Controller
         $filtro =  $request->filtro;
 
         if ($filtro == 'Nombre del funcionario los sistemas y los perfiles') {
-            $funcionarios = Funcionario::all();
+            $funcionarios = Funcionario::where("estado", 1)->get();
             $pdf = PDF::loadView('reportes.funcionario_sistemas', compact("funcionarios"))->setPaper('letter', 'portrait');
             // ENUMERAR LAS PÁGINAS USANDO CANVAS
             $pdf->output();
@@ -32,7 +32,7 @@ class ReporteController extends Controller
             return $pdf->download('FuncionarioSistemasPerfiles.pdf');
         }
         if ($filtro == 'Sistema y perfiles del sistema') {
-            $sistemas = Sistema::all();
+            $sistemas = Sistema::where("estado", 1)->get();
             $pdf = PDF::loadView('reportes.sistema_perfiles', compact("sistemas"))->setPaper('letter', 'portrait');
             // ENUMERAR LAS PÁGINAS USANDO CANVAS
             $pdf->output();

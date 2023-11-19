@@ -19,6 +19,17 @@ class FormularioController extends Controller
     public function index(Request $request)
     {
         $formularios = Formulario::all();
+        if (isset($request->filtra_estado) && $request->filtra_estado == 1) {
+            $estado_txt = mb_strtolower($request->estado);
+            $estado = 2;
+            if ($estado_txt == "habilitado") {
+                $estado = 1;
+            }
+            if ($estado_txt == "deshabilitado") {
+                $estado = 0;
+            }
+            $formularios = Formulario::where("estado", $estado)->get();
+        }
         return response()->JSON(['formularios' => $formularios, 'total' => count($formularios)], 200);
     }
 
@@ -26,7 +37,7 @@ class FormularioController extends Controller
     {
         if (isset($request->tipo_acceso) && $request->tipo_acceso != "") {
             if (
-                $request->tipo_acceso == "ALTO DE ACCESO" ||
+                $request->tipo_acceso == "ALTA DE ACCESO" ||
                 $request->tipo_acceso == 'BAJA DE ACCESO'
             ) {
                 $this->validacion["cargo_id"] = "required";
@@ -68,7 +79,7 @@ class FormularioController extends Controller
     {
         if (isset($request->tipo_acceso) && $request->tipo_acceso != "") {
             if (
-                $request->tipo_acceso == "ALTO DE ACCESO" ||
+                $request->tipo_acceso == "ALTA DE ACCESO" ||
                 $request->tipo_acceso == 'BAJA DE ACCESO'
             ) {
                 $this->validacion["cargo_id"] = "required";
@@ -111,10 +122,21 @@ class FormularioController extends Controller
 
     public function destroy(Formulario $formulario)
     {
-        $formulario->delete();
+        $formulario->estado = 0;
+        $formulario->save();
         return response()->JSON([
             'sw' => true,
             'msj' => 'El registro se eliminó correctamente'
+        ], 200);
+    }
+
+    public function habilitar(Formulario $formulario)
+    {
+        $formulario->estado = 1;
+        $formulario->save();
+        return response()->JSON([
+            'sw' => true,
+            'msj' => 'El registro se habilitó correctamente'
         ], 200);
     }
 
@@ -209,12 +231,12 @@ class FormularioController extends Controller
         $sheet->setCellValue('I' . $fila, 'AGENCIA DESTINO');
         $sheet->setCellValue('J' . $fila, 'CARGO');
         $sheet->setCellValue('K' . $fila, 'FECHA DE REGISTRO');
-        // $sheet->setWidth(['A' =>  5, 'B' =>  10, 'C' => 10, 'D' => 10, 'E' => 10, 'F' => 10, 'G' => 10, 'H' => 10, 'I' => 10, 'k' => 10, 'K' => 10, 'L' => 10, 'M' => 10, 'N' => 10, 'O' => 10, 'P' => 10, 'Q' => 10, 'R' => 10, 'S' => 10]);
+        // $sheet->setWidth(['A' =>  5, 'B' =>  10, 'C' => 10, 'D' => 10, 'E' => 10, 'F' => 10, 'G' => 10, 'H' => 10, 'I' => 10, 'k' => 10, 'K' => 10, 'K' => 10, 'M' => 10, 'N' => 10, 'O' => 10, 'P' => 10, 'Q' => 10, 'R' => 10, 'S' => 10]);
         $sheet->getStyle('A' . $fila . ':K' . $fila)->applyFromArray($styleArray);
         $fila++;
 
         $cont = 1;
-        $formularios = Formulario::all();
+        $formularios = Formulario::where("estado", 1)->get();
         foreach ($formularios as $formulario) {
             $sheet->setCellValue('A' . $fila, $formulario->codigo);
             $sheet->setCellValue('B' . $fila, $formulario->fecha_solicitud ? date("d/m/Y", strtotime($formulario->fecha_solicitud)) : "");
@@ -229,6 +251,7 @@ class FormularioController extends Controller
             } else {
                 $sheet->setCellValue('J' . $fila, $formulario->cargo->nombre);
             }
+            // $sheet->setCellValue('K' . $fila, $formulario->estado == 1 ? 'HABILITADO' : 'DESHABILITADO');
             $sheet->setCellValue('K' . $fila, date("d/m/Y", strtotime($formulario->fecha_registro)));
 
             $sheet->getStyle('A' . $fila . ':K' . $fila)->applyFromArray($estilo_conenido);

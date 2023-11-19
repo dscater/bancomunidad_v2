@@ -11,10 +11,17 @@ class Formulario extends Model
 
     protected $fillable = [
         "codigo", "fecha_solicitud", "fecha_respuesta", "hora_solicitud", "hora_respuesta", "funcionario_id",
-        "tipo_acceso", "cargo_id", "agencia_origen", "agencia_destino", "fecha_registro",
+        "tipo_acceso", "cargo_id", "agencia_origen", "agencia_destino", "fecha_registro", "estado"
     ];
 
     protected $with = ["cargo", "funcionario", "origen", "destino"];
+
+    protected $appends = ["estado_txt"];
+
+    public function getEstadoTxtAttribute()
+    {
+        return $this->estado == 1 ? 'HABILITADO' : 'DESHABILITADO';
+    }
 
     public function funcionario()
     {

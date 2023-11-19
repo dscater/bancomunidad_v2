@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cargo;
+use App\Models\Funcionario;
 use Illuminate\Http\Request;
 
 class CargoController extends Controller
@@ -17,6 +18,20 @@ class CargoController extends Controller
     public function index(Request $request)
     {
         $cargos = Cargo::all();
+        if (isset($request->habilitados)) {
+            $cargos = Cargo::where("estado", 1)->get();
+        }
+        if (isset($request->filtra_estado) && $request->filtra_estado == 1) {
+            $estado_txt = mb_strtolower($request->estado);
+            $estado = 2;
+            if ($estado_txt == "habilitado") {
+                $estado = 1;
+            }
+            if ($estado_txt == "deshabilitado") {
+                $estado = 0;
+            }
+            $cargos = Cargo::where("estado", $estado)->get();
+        }
         return response()->JSON(['cargos' => $cargos, 'total' => count($cargos)], 200);
     }
 
@@ -51,10 +66,21 @@ class CargoController extends Controller
 
     public function destroy(Cargo $cargo)
     {
-        $cargo->delete();
+        $cargo->estado = 0;
+        $cargo->save();
         return response()->JSON([
             'sw' => true,
             'msj' => 'El registro se eliminó correctamente'
+        ], 200);
+    }
+
+    public function habilitar(Cargo $cargo)
+    {
+        $cargo->estado = 1;
+        $cargo->save();
+        return response()->JSON([
+            'sw' => true,
+            'msj' => 'El registro se habilitó correctamente'
         ], 200);
     }
 }

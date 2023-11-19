@@ -93,12 +93,28 @@
                                                 empty-filtered-text="Sin resultados"
                                                 :filter="filter"
                                             >
+                                                <template #cell(estado)="row">
+                                                    <span
+                                                        class="badge"
+                                                        :class="[
+                                                            row.item.estado == 1
+                                                                ? 'badge-success'
+                                                                : 'badge-danger',
+                                                        ]"
+                                                    >
+                                                        {{
+                                                            row.item.estado == 1
+                                                                ? "HABILITADO"
+                                                                : "DESHABILITADO"
+                                                        }}</span
+                                                    >
+                                                </template>
                                                 <template #cell(detalle)="row">
                                                     <template
                                                         v-if="
                                                             row.item
                                                                 .tipo_acceso ==
-                                                                'ALTO DE ACCESO' ||
+                                                                'ALTA DE ACCESO' ||
                                                             row.item
                                                                 .tipo_acceso ==
                                                                 'BAJA DE ACCESO'
@@ -189,6 +205,37 @@
                                                             ></i>
                                                         </b-button>
                                                         <b-button
+                                                            v-if="
+                                                                row.item
+                                                                    .estado == 0
+                                                            "
+                                                            size="sm"
+                                                            pill
+                                                            variant="outline-success"
+                                                            class="btn-flat btn-block"
+                                                            title="Habilitar registro"
+                                                            @click="
+                                                                habilitarRegistro(
+                                                                    row.item.id,
+                                                                    row.item
+                                                                        .funcionario
+                                                                        .full_name +
+                                                                        ' <br/><small>' +
+                                                                        row.item
+                                                                            .tipo_acceso +
+                                                                        '</small>'
+                                                                )
+                                                            "
+                                                        >
+                                                            <i
+                                                                class="fa fa-check"
+                                                            ></i>
+                                                        </b-button>
+                                                        <b-button
+                                                            v-if="
+                                                                row.item
+                                                                    .estado == 1
+                                                            "
                                                             size="sm"
                                                             pill
                                                             variant="outline-danger"
@@ -319,6 +366,11 @@ export default {
                     label: "Fecha de registro",
                     sortable: true,
                 },
+                {
+                    key: "estado",
+                    label: "Estado",
+                    sortable: true,
+                },
                 { key: "accion", label: "Acción" },
             ],
             loading: true,
@@ -441,6 +493,35 @@ export default {
                     this.listRegistros = res.data.formularios;
                     this.totalRows = res.data.total;
                 });
+        },
+        habilitarRegistro(id, descripcion) {
+            Swal.fire({
+                title: "¿Quierés habilitar este registro?",
+                html: `<strong>${descripcion}</strong>`,
+                showCancelButton: true,
+                confirmButtonColor: "#80B900",
+                confirmButtonText: "Si, habilitar",
+                cancelButtonText: "No, cancelar",
+                denyButtonText: `No, cancelar`,
+            }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    axios
+                        .post("/admin/formularios/habilitar/" + id, {
+                            _method: "PUT",
+                        })
+                        .then((res) => {
+                            this.getFormularios();
+                            this.filter = "";
+                            Swal.fire({
+                                icon: "success",
+                                title: res.data.msj,
+                                showConfirmButton: false,
+                                timer: 1500,
+                            });
+                        });
+                }
+            });
         },
         eliminaFormulario(id, descripcion) {
             Swal.fire({

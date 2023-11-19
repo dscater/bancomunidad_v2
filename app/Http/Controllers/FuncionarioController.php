@@ -31,8 +31,20 @@ class FuncionarioController extends Controller
         $filter_fecha = $request->filter_fecha;
 
         $funcionarios = Funcionario::orderBy("nombre", "asc");
+
         if (isset($filter_ci) &&  trim($filter_ci) != "") {
             $funcionarios->where("ci", "LIKE", "%$filter_ci%");
+            $estado = 2;
+            $cadena = mb_strtolower(trim($filter_ci));
+            if ($cadena == "deshabilitado") {
+                $estado = 0;
+            }
+            if ($cadena == "habilitado") {
+                $estado = 1;
+            }
+            if ($estado != 2) {
+                $funcionarios->orWhere("estado", $estado);
+            }
         }
 
         if (isset($filter_nombre) &&  trim($filter_nombre) != "") {
@@ -53,6 +65,10 @@ class FuncionarioController extends Controller
 
         if (isset($filter_fecha) &&  trim($filter_fecha) != "") {
             $funcionarios->where("fecha_registro", $filter_fecha);
+        }
+
+        if (isset($request->habilitados)) {
+            $funcionarios->where("estado", 1);
         }
 
         $funcionarios = $funcionarios->get();
@@ -97,17 +113,27 @@ class FuncionarioController extends Controller
 
     public function destroy(Funcionario $funcionario)
     {
-        foreach($funcionario->asignacions as $value){
-            $value->asignacion_detalles()->delete();
-            $value->delete();
-        }
-        
-        $funcionario->formularios()->delete();
-        $funcionario->acceso_sistemas()->delete();
-        $funcionario->delete();
+        // foreach($funcionario->asignacions as $value){
+        //     $value->asignacion_detalles()->delete();
+        //     $value->delete();
+        // }
+        // $funcionario->formularios()->delete();
+        // $funcionario->acceso_sistemas()->delete();
+        $funcionario->estado = 0;
+        $funcionario->save();
         return response()->JSON([
             'sw' => true,
             'msj' => 'El registro se eliminó correctamente'
+        ], 200);
+    }
+
+    public function habilitar(Funcionario $funcionario)
+    {
+        $funcionario->estado = 1;
+        $funcionario->save();
+        return response()->JSON([
+            'sw' => true,
+            'msj' => 'El registro se habilitó correctamente'
         ], 200);
     }
 }

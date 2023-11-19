@@ -45,7 +45,7 @@
                                                 class="form-control"
                                                 v-model="filter_ci"
                                                 @keyup="getFuncionarios"
-                                                placeholder="C.I."
+                                                placeholder="C.I. / Estado"
                                             />
                                         </div>
                                     </b-col>
@@ -67,6 +67,22 @@
                                                 empty-filtered-text="Sin resultados"
                                                 :filter="filter"
                                             >
+                                                <template #cell(estado)="row">
+                                                    <span
+                                                        class="badge"
+                                                        :class="[
+                                                            row.item.estado == 1
+                                                                ? 'badge-success'
+                                                                : 'badge-danger',
+                                                        ]"
+                                                    >
+                                                        {{
+                                                            row.item.estado == 1
+                                                                ? "HABILITADO"
+                                                                : "DESHABILITADO"
+                                                        }}</span
+                                                    >
+                                                </template>
                                                 <template
                                                     #cell(fecha_registro)="row"
                                                 >
@@ -99,6 +115,32 @@
                                                             ></i>
                                                         </b-button>
                                                         <b-button
+                                                            v-if="
+                                                                row.item
+                                                                    .estado == 0
+                                                            "
+                                                            size="sm"
+                                                            pill
+                                                            variant="outline-success"
+                                                            class="btn-flat btn-block"
+                                                            title="Habilitar registro"
+                                                            @click="
+                                                                habilitarRegistro(
+                                                                    row.item.id,
+                                                                    row.item
+                                                                        .full_name
+                                                                )
+                                                            "
+                                                        >
+                                                            <i
+                                                                class="fa fa-check"
+                                                            ></i>
+                                                        </b-button>
+                                                        <b-button
+                                                            v-if="
+                                                                row.item
+                                                                    .estado == 1
+                                                            "
                                                             size="sm"
                                                             pill
                                                             variant="outline-danger"
@@ -205,6 +247,11 @@ export default {
                 {
                     key: "fecha_registro",
                     label: "Fecha de registro",
+                    sortable: true,
+                },
+                {
+                    key: "estado",
+                    label: "Estado",
                     sortable: true,
                 },
                 { key: "accion", label: "Acción" },
@@ -321,6 +368,35 @@ export default {
                     this.listRegistros = res.data.funcionarios;
                     this.totalRows = res.data.total;
                 });
+        },
+        habilitarRegistro(id, descripcion) {
+            Swal.fire({
+                title: "¿Quierés habilitar este registro?",
+                html: `<strong>${descripcion}</strong>`,
+                showCancelButton: true,
+                confirmButtonColor: "#80B900",
+                confirmButtonText: "Si, habilitar",
+                cancelButtonText: "No, cancelar",
+                denyButtonText: `No, cancelar`,
+            }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    axios
+                        .post("/admin/funcionarios/habilitar/" + id, {
+                            _method: "PUT",
+                        })
+                        .then((res) => {
+                            this.getFuncionarios();
+                            this.filter = "";
+                            Swal.fire({
+                                icon: "success",
+                                title: res.data.msj,
+                                showConfirmButton: false,
+                                timer: 1500,
+                            });
+                        });
+                }
+            });
         },
         eliminaFuncionario(id, descripcion) {
             Swal.fire({

@@ -52,6 +52,7 @@
                                                     v-model="filter"
                                                     type="search"
                                                     placeholder="Buscar"
+                                                    @keyup="filtraEstado"
                                                 ></b-form-input>
 
                                                 <b-input-group-append>
@@ -59,7 +60,10 @@
                                                         class="bg-primary"
                                                         variant="primary"
                                                         :disabled="!filter"
-                                                        @click="filter = ''"
+                                                        @click="
+                                                            filter = '';
+                                                            filtraEstado();
+                                                        "
                                                         >Borrar</b-button
                                                     >
                                                 </b-input-group-append>
@@ -84,6 +88,22 @@
                                                 empty-filtered-text="Sin resultados"
                                                 :filter="filter"
                                             >
+                                                <template #cell(estado)="row">
+                                                    <span
+                                                        class="badge"
+                                                        :class="[
+                                                            row.item.estado == 1
+                                                                ? 'badge-success'
+                                                                : 'badge-danger',
+                                                        ]"
+                                                    >
+                                                        {{
+                                                            row.item.estado == 1
+                                                                ? "HABILITADO"
+                                                                : "DESHABILITADO"
+                                                        }}</span
+                                                    >
+                                                </template>
                                                 <template
                                                     #cell(fecha_registro)="row"
                                                 >
@@ -116,6 +136,33 @@
                                                             ></i>
                                                         </b-button>
                                                         <b-button
+                                                            v-if="
+                                                                row.item
+                                                                    .estado == 0
+                                                            "
+                                                            size="sm"
+                                                            pill
+                                                            variant="outline-success"
+                                                            class="btn-flat btn-block"
+                                                            title="Habilitar registro"
+                                                            @click="
+                                                                habilitarRegistro(
+                                                                    row.item.id,
+                                                                    row.item
+                                                                        .sistema
+                                                                        .nombre
+                                                                )
+                                                            "
+                                                        >
+                                                            <i
+                                                                class="fa fa-check"
+                                                            ></i>
+                                                        </b-button>
+                                                        <b-button
+                                                            v-if="
+                                                                row.item
+                                                                    .estado == 1
+                                                            "
                                                             size="sm"
                                                             pill
                                                             variant="outline-danger"
@@ -125,7 +172,8 @@
                                                                 eliminaPerfilSistema(
                                                                     row.item.id,
                                                                     row.item
-                                                                        .full_name
+                                                                        .sistema
+                                                                        .nombre
                                                                 )
                                                             "
                                                         >
@@ -207,6 +255,7 @@ export default {
                     label: "Fecha de registro",
                     sortable: true,
                 },
+                { key: "estado", label: "Estado", sortable: true },
                 { key: "accion", label: "Acción" },
             ],
             loading: true,
@@ -239,7 +288,24 @@ export default {
         this.loadingWindow.close();
         this.getPerfilSistemas();
     },
+    watch: {
+        filter(newVal) {
+            if (newVal.trim() == "") {
+                this.getPerfilSistemas();
+            }
+        },
+    },
     methods: {
+        filtraEstado() {
+            if (
+                this.filter.toLowerCase() == "deshabilitado" ||
+                this.filter.toLowerCase() == "habilitado"
+            ) {
+                this.getPerfilSistemas(1);
+            } else {
+                this.getPerfilSistemas();
+            }
+        },
         // Seleccionar Opciones de Tabla
         editarRegistro(item) {
             this.oPerfilSistema.id = item.id;
@@ -255,7 +321,7 @@ export default {
         },
 
         // Listar PerfilSistemas
-        getPerfilSistemas() {
+        getPerfilSistemas(filtra_estado = 0) {
             this.showOverlay = true;
             this.muestra_modal = false;
             let url = "/admin/perfil_sistemas";
@@ -264,13 +330,46 @@ export default {
             }
             axios
                 .get(url, {
-                    params: { per_page: this.per_page },
+                    params: {
+                        per_page: this.per_page,
+                        filtra_estado,
+                        estado: this.filter,
+                    },
                 })
                 .then((res) => {
                     this.showOverlay = false;
                     this.listRegistros = res.data.perfil_sistemas;
                     this.totalRows = res.data.total;
                 });
+        },
+        habilitarRegistro(id, descripcion) {
+            Swal.fire({
+                title: "¿Quierés habilitar este registro?",
+                html: `<strong>${descripcion}</strong>`,
+                showCancelButton: true,
+                confirmButtonColor: "#80B900",
+                confirmButtonText: "Si, habilitar",
+                cancelButtonText: "No, cancelar",
+                denyButtonText: `No, cancelar`,
+            }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) {
+                    axios
+                        .post("/admin/perfil_sistemas/habilitar/" + id, {
+                            _method: "PUT",
+                        })
+                        .then((res) => {
+                            this.getPerfilSistemas();
+                            this.filter = "";
+                            Swal.fire({
+                                icon: "success",
+                                title: res.data.msj,
+                                showConfirmButton: false,
+                                timer: 1500,
+                            });
+                        });
+                }
+            });
         },
         eliminaPerfilSistema(id, descripcion) {
             Swal.fire({

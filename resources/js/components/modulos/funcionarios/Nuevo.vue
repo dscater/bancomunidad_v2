@@ -464,21 +464,33 @@ export default {
     methods: {
         //get Cargos
         getCargos() {
-            axios.get("/admin/cargos").then((response) => {
-                this.listCargos = response.data.cargos;
-            });
+            axios
+                .get("/admin/cargos", {
+                    params: { habilitados: 1 },
+                })
+                .then((response) => {
+                    this.listCargos = response.data.cargos;
+                });
         },
         //get Regionals
         getRegionals() {
-            axios.get("/admin/regionals").then((response) => {
-                this.listInputs.regionals = response.data.regionals;
-            });
+            axios
+                .get("/admin/regionals", {
+                    params: { habilitados: 1 },
+                })
+                .then((response) => {
+                    this.listInputs.regionals = response.data.regionals;
+                });
         },
         //get Agencias
         getAgencias() {
-            axios.get("/admin/agencias").then((response) => {
-                this.listInputs.agencias = response.data.agencias;
-            });
+            axios
+                .get("/admin/agencias", {
+                    params: { habilitados: 1 },
+                })
+                .then((response) => {
+                    this.listInputs.agencias = response.data.agencias;
+                });
         },
 
         // envia modal

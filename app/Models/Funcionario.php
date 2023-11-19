@@ -11,7 +11,7 @@ class Funcionario extends Model
 
     protected $fillable = [
         "ci", "nombre", "paterno", "materno", "cargo_id",
-        "regional_id", "agencia_id", "fecha_registro",
+        "regional_id", "agencia_id", "fecha_registro", "estado"
     ];
 
     protected $with = ["cargo", "regional", "agencia"];

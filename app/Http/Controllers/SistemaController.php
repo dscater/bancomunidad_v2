@@ -23,6 +23,20 @@ class SistemaController extends Controller
     public function index(Request $request)
     {
         $sistemas = Sistema::with("opciones")->get();
+        if (isset($request->habilitados)) {
+            $sistemas = Sistema::with("opciones")->where("estado", 1)->get();
+        }
+        if (isset($request->filtra_estado) && $request->filtra_estado == 1) {
+            $estado_txt = mb_strtolower($request->estado);
+            $estado = 2;
+            if ($estado_txt == "habilitado") {
+                $estado = 1;
+            }
+            if ($estado_txt == "deshabilitado") {
+                $estado = 0;
+            }
+            $sistemas = Sistema::where("estado", $estado)->get();
+        }
         return response()->JSON(['sistemas' => $sistemas, 'total' => count($sistemas)], 200);
     }
 
@@ -95,18 +109,29 @@ class SistemaController extends Controller
 
     public function destroy(Sistema $sistema)
     {
-        $sistema->perfiles()->delete();
-        $sistema->opciones()->delete();
-        $sistema->delete();
+        // $sistema->perfiles()->delete();
+        // $sistema->opciones()->delete();
+        $sistema->estado = 0;
+        $sistema->save();
         return response()->JSON([
             'sw' => true,
             'msj' => 'El registro se eliminó correctamente'
         ], 200);
     }
 
+    public function habilitar(Sistema $sistema)
+    {
+        $sistema->estado = 1;
+        $sistema->save();
+        return response()->JSON([
+            'sw' => true,
+            'msj' => 'El registro se habilitó correctamente'
+        ], 200);
+    }
+
     public function getPerfiles(Sistema $sistema)
     {
-        $perfiles = PerfilSistema::where("sistema_id", $sistema->id)->get();
+        $perfiles = PerfilSistema::where("sistema_id", $sistema->id)->where("estado", 1)->get();
         return response()->JSON($perfiles);
     }
 

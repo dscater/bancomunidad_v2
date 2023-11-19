@@ -173,7 +173,7 @@
                                 >
                                     <el-option
                                         v-for="item in [
-                                            'ALTO DE ACCESO',
+                                            'ALTA DE ACCESO',
                                             'BAJA DE ACCESO',
                                             'CAMBIO DE AGENCIA',
                                         ]"
@@ -263,8 +263,9 @@
                             <div
                                 class="form-group col-md-6"
                                 v-if="
-                                    formulario.tipo_acceso != '' &&
-                                    formulario.tipo_acceso == 'ALTO DE ACCESO' || 
+                                    (formulario.tipo_acceso != '' &&
+                                        formulario.tipo_acceso ==
+                                            'ALTA DE ACCESO') ||
                                     formulario.tipo_acceso == 'BAJA DE ACCESO'
                                 "
                             >
@@ -396,21 +397,33 @@ export default {
     methods: {
         //get Cargos
         getCargos() {
-            axios.get("/admin/cargos").then((response) => {
-                this.listCargos = response.data.cargos;
-            });
+            axios
+                .get("/admin/cargos", {
+                    params: { habilitados: 1 },
+                })
+                .then((response) => {
+                    this.listCargos = response.data.cargos;
+                });
         },
         //get Agencias
         getAgencias() {
-            axios.get("/admin/agencias").then((response) => {
-                this.listAgencias = response.data.agencias;
-            });
+            axios
+                .get("/admin/agencias", {
+                    params: { habilitados: 1 },
+                })
+                .then((response) => {
+                    this.listAgencias = response.data.agencias;
+                });
         },
         //get Agencias
         getFuncionarios() {
-            axios.get("/admin/funcionarios").then((response) => {
-                this.listFuncionarios = response.data.funcionarios;
-            });
+            axios
+                .get("/admin/funcionarios", {
+                    params: { habilitados: 1 },
+                })
+                .then((response) => {
+                    this.listFuncionarios = response.data.funcionarios;
+                });
         },
         // envia modal
         setRegistroModal() {
