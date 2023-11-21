@@ -139,7 +139,7 @@
         }
 
         .gray {
-            background: rgb(202, 202, 202);
+            background: rgb(238, 237, 237);
         }
 
         .txt_rojo {}
@@ -166,7 +166,8 @@
         <h4 class="fecha">Expedido: {{ date('d-m-Y') }}</h4>
     </div>
     @foreach ($funcionarios as $funcionario)
-        <p class="funcionario"><strong>Nombre del funcionario:</strong> {{ $funcionario->full_name }}</p>
+        <p class="funcionario" style="margin-top:20px;"><strong>Nombre del funcionario:</strong>
+            {{ $funcionario->full_name }}</p>
         <table border="1">
             <thead>
                 <tr>
@@ -175,38 +176,44 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($funcionario->acceso_sistemas as $acceso_sistema)
-                    @php
-                        $existe = $o_Asignacion
-                            ->where('funcionario_id', $funcionario->id)
-                            ->where('sistema_id', $acceso_sistema->sistema_id)
-                            ->get()
-                            ->first();
-                    @endphp
-                    <tr>
-                        <td>{{ $acceso_sistema->sistema->nombre }}</td>
-                        <td>
-                            <ol>
-                                @foreach ($acceso_sistema->sistema->perfiles as $perfil)
-                                    @php
-                                        $acceso = 'NO';
-                                        if ($existe) {
-                                            $existe_acceso = $o_AsignacionDetalle
-                                                ->where('asignacion_id', $existe->id)
-                                                ->where('perfil_id', $perfil->perfil_id)
-                                                ->get()
-                                                ->first();
-                                            if ($existe_acceso) {
-                                                $acceso = 'SI';
+                @if (count($funcionario->acceso_sistemas) > 0)
+                    @foreach ($funcionario->acceso_sistemas as $acceso_sistema)
+                        @php
+                            $existe = $o_Asignacion
+                                ->where('funcionario_id', $funcionario->id)
+                                ->where('sistema_id', $acceso_sistema->sistema_id)
+                                ->get()
+                                ->first();
+                        @endphp
+                        <tr>
+                            <td>{{ $acceso_sistema->sistema->nombre }}</td>
+                            <td>
+                                <ol>
+                                    @foreach ($acceso_sistema->sistema->perfiles as $perfil)
+                                        @php
+                                            $acceso = 'NO';
+                                            if ($existe) {
+                                                $existe_acceso = $o_AsignacionDetalle
+                                                    ->where('asignacion_id', $existe->id)
+                                                    ->where('perfil_id', $perfil->perfil_id)
+                                                    ->get()
+                                                    ->first();
+                                                if ($existe_acceso) {
+                                                    $acceso = 'SI';
+                                                }
                                             }
-                                        }
-                                    @endphp
-                                    <li>{{ $perfil->perfil->nombre }} <strong>({{ $acceso }})</strong></li>
-                                @endforeach
-                            </ol>
-                        </td>
+                                        @endphp
+                                        <li>{{ $perfil->perfil->nombre }} <strong>({{ $acceso }})</strong></li>
+                                    @endforeach
+                                </ol>
+                            </td>
+                        </tr>
+                    @endforeach
+                @else
+                    <tr>
+                        <td colspan="2" class="gray centreado">El funcionario no tiene sistemas asignados</td>
                     </tr>
-                @endforeach
+                @endif
             </tbody>
         </table>
     @endforeach

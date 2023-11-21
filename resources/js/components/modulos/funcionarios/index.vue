@@ -29,8 +29,8 @@
                                                 limpiaFuncionario();
                                             "
                                         >
-                                            <i class="fa fa-upload"></i>
-                                            Importar
+                                            <i class="fa fa-plus"></i>
+                                            Nuevo
                                         </button>
                                     </div>
                                 </div>
