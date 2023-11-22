@@ -176,20 +176,20 @@
                 </tr>
             </thead>
             <tbody>
-                @if (count($funcionario->acceso_sistemas) > 0)
-                    @foreach ($funcionario->acceso_sistemas as $acceso_sistema)
+                @if (count($sistemas) > 0)
+                    @foreach ($sistemas as $sistema)
                         @php
                             $existe = $o_Asignacion
                                 ->where('funcionario_id', $funcionario->id)
-                                ->where('sistema_id', $acceso_sistema->sistema_id)
+                                ->where('sistema_id', $sistema->id)
                                 ->get()
                                 ->first();
                         @endphp
                         <tr>
-                            <td>{{ $acceso_sistema->sistema->nombre }}</td>
+                            <td>{{ $sistema->nombre }}</td>
                             <td>
                                 <ol>
-                                    @foreach ($acceso_sistema->sistema->perfiles as $perfil)
+                                    @foreach ($sistema->perfiles as $perfil)
                                         @php
                                             $acceso = 'NO';
                                             if ($existe) {
@@ -211,7 +211,7 @@
                     @endforeach
                 @else
                     <tr>
-                        <td colspan="2" class="gray centreado">El funcionario no tiene sistemas asignados</td>
+                        <td colspan="2" class="gray centreado">No se encontrarón Sistemas registrados aún</td>
                     </tr>
                 @endif
             </tbody>
